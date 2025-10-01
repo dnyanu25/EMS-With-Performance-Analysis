@@ -58,6 +58,20 @@ public class EmployeeTableView extends JFrame {
         JButton refreshButton = new JButton("Refresh");
         JButton exitButton = new JButton("Exit");
 
+        // 🔍 Search panel
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchPanel.setBackground(new Color(230, 245, 255));
+
+        JLabel searchLabel = new JLabel("SearchByName:");
+        searchLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        JTextField searchField = new JTextField(20);
+        searchField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        searchPanel.add(searchLabel);
+        searchPanel.add(searchField);
+        panel.add(searchPanel, BorderLayout.BEFORE_FIRST_LINE);
+
 
 
         for (JButton btn : new JButton[]{editButton, deleteButton, refreshButton,exitButton}) {
@@ -126,13 +140,47 @@ public class EmployeeTableView extends JFrame {
             }
         });
 
+        //search
+
+        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
+
+            private void filterTable() {
+                String query = searchField.getText().toLowerCase();
+                DefaultTableModel model = (DefaultTableModel) employeeTable.getModel();
+                model.setRowCount(0); // clear table
+
+                List<Employee> employees = employeeService.getAllEmployees();
+                for (Employee emp : employees) {
+                    if (emp.getName().toLowerCase().contains(query) ||
+                            emp.getDepartment().toLowerCase().contains(query)) {
+                        model.addRow(new Object[]{
+                                emp.getId(),
+                                emp.getName(),
+                                emp.getRole(),
+                                emp.getEmail(),
+                                emp.getPhoneNumber(),
+                                emp.getDepartment(),
+                                emp.getDateOfJoining(),
+                                emp.getSalary(),
+                                emp.getPerformanceScore(),
+                                emp.getPerformanceGrade(),
+                                emp.getManagerName(),
+                                emp.isActive() ? "Yes" : "No"
+                        });
+                    }
+                }
+            }
+        });
+
+
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(panel);
         setVisible(true);
     }
-
-
     private void loadEmployeeData(DefaultTableModel model) {
         try {
             List<Employee> employees = employeeService.getAllEmployees(); // you’ll need this in your DAO
