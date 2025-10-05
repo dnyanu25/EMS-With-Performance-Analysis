@@ -27,7 +27,6 @@ public class EmployeeTableView extends JFrame {
         Font buttonFont = new Font("Segoe UI", Font.BOLD, 14);
         Color buttonColor = new Color(60, 120, 200);
 
-
         // Heading
         JLabel heading = new JLabel("All Employees", SwingConstants.CENTER);
         heading.setFont(new Font("Segoe UI", Font.BOLD, 24));
@@ -49,20 +48,12 @@ public class EmployeeTableView extends JFrame {
         // Scroll pane
         JScrollPane scrollPane = new JScrollPane(employeeTable);
         panel.add(scrollPane, BorderLayout.CENTER);
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(new Color(230, 245, 255));
-
-
-        JButton editButton = new JButton("Edit");
-        JButton deleteButton = new JButton("Delete");
-        JButton refreshButton = new JButton("Refresh");
-        JButton exitButton = new JButton("Exit");
 
         // 🔍 Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.setBackground(new Color(230, 245, 255));
 
-        JLabel searchLabel = new JLabel("SearchByName:");
+        JLabel searchLabel = new JLabel("Search:");
         searchLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
         JTextField searchField = new JTextField(20);
@@ -72,9 +63,18 @@ public class EmployeeTableView extends JFrame {
         searchPanel.add(searchField);
         panel.add(searchPanel, BorderLayout.BEFORE_FIRST_LINE);
 
+        // 🔘 Buttons
+        JButton editButton = new JButton("Edit");
+        JButton deleteButton = new JButton("Delete");
+        JButton refreshButton = new JButton("Refresh");
+        JButton exitButton = new JButton("Exit");
+        JButton exportButton = new JButton("Export to CSV");
+        JButton dashboardButton = new JButton("View Dashboard"); // ✅ NEW BUTTON
 
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(new Color(230, 245, 255));
 
-        for (JButton btn : new JButton[]{editButton, deleteButton, refreshButton,exitButton}) {
+        for (JButton btn : new JButton[]{editButton, deleteButton, refreshButton, exitButton, exportButton, dashboardButton}) {
             btn.setFont(buttonFont);
             btn.setBackground(buttonColor);
             btn.setForeground(Color.WHITE);
@@ -83,14 +83,14 @@ public class EmployeeTableView extends JFrame {
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
-// 🔹 Refresh button
+        // 🔹 Refresh button
         refreshButton.addActionListener(e -> {
             DefaultTableModel m = (DefaultTableModel) employeeTable.getModel();
-            m.setRowCount(0); // clear table
-            loadEmployeeData(m); // reload data
+            m.setRowCount(0);
+            loadEmployeeData(m);
         });
 
-// 🔹 Delete button
+        // 🔹 Delete button
         deleteButton.addActionListener(e -> {
             int row = employeeTable.getSelectedRow();
             if (row == -1) {
@@ -105,14 +105,14 @@ public class EmployeeTableView extends JFrame {
                 boolean success = employeeService.removeEmployee(id);
                 if (success) {
                     JOptionPane.showMessageDialog(this, "✅ Employee deleted.");
-                    refreshButton.doClick(); // reload table
+                    refreshButton.doClick();
                 } else {
                     JOptionPane.showMessageDialog(this, "❌ Failed to delete employee.");
                 }
             }
         });
 
-// 🔹 Edit button (basic placeholder for now)
+        // 🔹 Edit button
         editButton.addActionListener(e -> {
             int row = employeeTable.getSelectedRow();
             if (row == -1) {
@@ -124,24 +124,20 @@ public class EmployeeTableView extends JFrame {
             if (emp != null) {
                 JOptionPane.showMessageDialog(this, "Editing employee: " + emp.getName());
                 // 👉 Later: open EmployeeForm pre-filled with emp’s data
-
             }
         });
 
-
-//   exit button
+        // 🔹 Exit button
         exitButton.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this,
                     "Are you sure you want to exit?",
                     "Confirm Exit", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                dispose(); // closes only this window
-                // System.exit(0); // 👉 use this if you want to close the entire app
+                dispose();
             }
         });
 
-        //search
-
+        // 🔹 Search logic
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void insertUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
             public void removeUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
@@ -150,12 +146,15 @@ public class EmployeeTableView extends JFrame {
             private void filterTable() {
                 String query = searchField.getText().toLowerCase();
                 DefaultTableModel model = (DefaultTableModel) employeeTable.getModel();
-                model.setRowCount(0); // clear table
+                model.setRowCount(0);
 
                 List<Employee> employees = employeeService.getAllEmployees();
                 for (Employee emp : employees) {
-                    if (emp.getName().toLowerCase().contains(query) ||
+                    String idStr = String.valueOf(emp.getId());
+                    if (idStr.contains(query) ||
+                            emp.getName().toLowerCase().contains(query) ||
                             emp.getDepartment().toLowerCase().contains(query)) {
+
                         model.addRow(new Object[]{
                                 emp.getId(),
                                 emp.getName(),
@@ -175,15 +174,43 @@ public class EmployeeTableView extends JFrame {
             }
         });
 
+        // 🔹 Export button
+        exportButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save Employee Data");
+            int userSelection = fileChooser.showSaveDialog(this);
 
-        panel.add(buttonPanel, BorderLayout.SOUTH);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                java.io.File fileToSave = fileChooser.getSelectedFile();
+                try (java.io.FileWriter fw = new java.io.FileWriter(fileToSave + ".csv")) {
+                    for (int i = 0; i < model.getColumnCount(); i++) {
+                        fw.write(model.getColumnName(i) + (i < model.getColumnCount() - 1 ? "," : "\n"));
+                    }
+                    for (int i = 0; i < model.getRowCount(); i++) {
+                        for (int j = 0; j < model.getColumnCount(); j++) {
+                            fw.write(model.getValueAt(i, j).toString() + (j < model.getColumnCount() - 1 ? "," : "\n"));
+                        }
+                    }
+                    JOptionPane.showMessageDialog(this, "✅ Data exported successfully!");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "❌ Failed to export data.");
+                }
+            }
+        });
+
+        // ✅ Dashboard button
+        dashboardButton.addActionListener(e -> {
+            new PerformanceDashboard();
+        });
 
         add(panel);
         setVisible(true);
     }
+
     private void loadEmployeeData(DefaultTableModel model) {
         try {
-            List<Employee> employees = employeeService.getAllEmployees(); // you’ll need this in your DAO
+            List<Employee> employees = employeeService.getAllEmployees();
             for (Employee emp : employees) {
                 model.addRow(new Object[]{
                         emp.getId(),
