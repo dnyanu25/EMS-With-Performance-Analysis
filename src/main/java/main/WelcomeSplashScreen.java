@@ -7,6 +7,7 @@ public class WelcomeSplashScreen extends JFrame {
 
     public WelcomeSplashScreen() {
         setTitle("Welcome");
+
         setSize(700, 400);
         setUndecorated(true);
         setOpacity(0f);
