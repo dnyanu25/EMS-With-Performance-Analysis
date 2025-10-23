@@ -3,6 +3,9 @@ package service;
 import dao.EmployeeDao;
 import model.Employee;
 import dao.DatabaseManager;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.sql.*;
 import java.util.Map;
 import java.util.LinkedHashMap;
@@ -162,6 +165,31 @@ public class EmployeeService {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public boolean exportEmployeesToCSV(String filePath) {
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT department, performanceScore, performanceGrade FROM employees");
+             BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+
+            writer.write("department,performanceScore,performanceGrade\n");
+
+            while (rs.next()) {
+                String dept = rs.getString("department");
+                double score = rs.getDouble("performanceScore");
+                String grade = rs.getString("performanceGrade");
+
+                writer.write(dept + "," + score + "," + grade + "\n");
+            }
+
+            writer.close();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

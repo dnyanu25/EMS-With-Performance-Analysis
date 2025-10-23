@@ -7,12 +7,12 @@ import java.awt.*;
 
 public class UserLoginForm extends JFrame {
 
-    private JTextField idField; // ✅ Moved outside constructor
+    private JTextField idField;
 
     public UserLoginForm() {
         setTitle("User Login");
         setSize(900, 500);
-        setUndecorated(true); // for fade-in
+        setUndecorated(true);
         setOpacity(0f);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -37,12 +37,12 @@ public class UserLoginForm extends JFrame {
                 BorderFactory.createEmptyBorder(30, 30, 30, 30),
                 BorderFactory.createLineBorder(new Color(200, 200, 200), 1)
         ));
-        formWrapper.setMaximumSize(new Dimension(400, 250));
+        formWrapper.setMaximumSize(new Dimension(400, 300));
         formWrapper.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel idLabel = new JLabel("Employee ID:");
         idLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        idField = new JTextField(); // ✅ Now accessible outside constructor
+        idField = new JTextField();
         idField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
         JLabel passLabel = new JLabel("Date of Joining (YYYY-MM-DD):");
@@ -58,6 +58,21 @@ public class UserLoginForm extends JFrame {
         loginButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         loginButton.setPreferredSize(new Dimension(120, 40));
 
+        // 🔹 Back button
+        JButton backButton = new JButton("Back");
+        backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        backButton.setBackground(new Color(100, 100, 100));
+        backButton.setForeground(Color.WHITE);
+        backButton.setFocusPainted(false);
+        backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        backButton.setPreferredSize(new Dimension(120, 40));
+        backButton.addActionListener(e -> {
+            new RoleSelectionLogin();
+            dispose();
+        });
+
+
+
         formWrapper.add(idLabel);
         formWrapper.add(Box.createVerticalStrut(5));
         formWrapper.add(idField);
@@ -67,6 +82,9 @@ public class UserLoginForm extends JFrame {
         formWrapper.add(passwordField);
         formWrapper.add(Box.createVerticalStrut(20));
         formWrapper.add(loginButton);
+        formWrapper.add(Box.createVerticalStrut(10));
+        formWrapper.add(backButton);
+        formWrapper.add(Box.createVerticalStrut(10));
 
         // 🔹 Center panel
         JPanel centerPanel = new JPanel();
@@ -90,18 +108,18 @@ public class UserLoginForm extends JFrame {
             }
 
             EmployeeService service = new EmployeeService();
-            boolean valid = service.validateUserLogin(empId, password); // password = date of joining
+            boolean valid = service.validateUserLogin(empId, password);
 
             if (valid) {
                 JOptionPane.showMessageDialog(this, "Welcome, Employee " + empId + "!");
-                new UserDetailsView(empId); // ✅ Pass ID to profile view
+                new UserDetailsView(empId);
                 dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials. Try again.");
             }
         });
 
-        fadeInWindow(); // ✅ Animate window on open
+        fadeInWindow();
         setVisible(true);
     }
 
@@ -115,6 +133,6 @@ public class UserLoginForm extends JFrame {
     }
 
     public static void main(String[] args) {
-        new UserLoginForm(); // ✅ No need to fetch ID here
+        new UserLoginForm();
     }
 }

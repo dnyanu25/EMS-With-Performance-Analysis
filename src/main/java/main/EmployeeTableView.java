@@ -204,6 +204,19 @@ public class EmployeeTableView extends JFrame {
             new PerformanceDashboard();
         });
 
+//        JButton exportButton = new JButton("Export to Weka CSV");
+        exportButton.addActionListener(e -> {
+            EmployeeService service = new EmployeeService();
+            boolean success = service.exportEmployeesToCSV("employees.csv");
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, "CSV exported successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Export failed.");
+            }
+        });
+
+
         add(panel);
         setVisible(true);
     }
