@@ -10,7 +10,7 @@ public class WekaPredictor {
     public void trainModel(String csvPath) throws Exception {
         DataSource source = new DataSource(csvPath);
         Instances data = source.getDataSet();
-        data.setClassIndex(data.numAttributes() - 1); // last column = grade
+        data.setClassIndex(data.numAttributes() - 1); // last column = grade 
 
         model = new J48(); // decision tree
         model.buildClassifier(data);
