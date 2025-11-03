@@ -9,4 +9,6 @@ analysis using Java ML libraries.
 • ***Tech Stack:*** Advanced Java, MySQL, OOP
 
 ***2 modules***
+1.Admin
+2.User/Employee
 
