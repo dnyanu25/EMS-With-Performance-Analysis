@@ -1,4 +1,6 @@
-EMS with performance nan
+****EMS with performance Analysis****
+
+
 Developed an Employee Management System with Performance Analysis using Advanced Java and MySQL.
 Implemented CRUD operations for employee records and departments, and integrated predictive performance
 analysis using Java ML libraries.
