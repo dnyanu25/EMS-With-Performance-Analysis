@@ -18,6 +18,7 @@ public class Employee {
     private String managerName;
     private boolean isActive;
 
+
     public Employee() {}
 
     public Employee(int id, String name, String role, String email, String phoneNumber, String department, Date dateOfJoining, double salary, double performanceScore, String performanceGrade, String managerName, boolean isActive) {
